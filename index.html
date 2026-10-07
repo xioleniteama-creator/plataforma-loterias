@@ -1,0 +1,3283 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="es" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Lotería Pro · Plataforma de juegos de azar (demo)</title>
+    <meta
+      name="description"
+      content="Plataforma demo para venta de loterías y juegos de azar: elige tu juego, selecciona números, arma tu jugada y compra desde un slip."
+    />
+    <link rel="icon" href="/favicon.ico" />
+    <style>
+      :root {
+        --bg: #05060a;
+        --panel: rgba(18, 20, 28, 0.72);
+        --panel2: rgba(16, 18, 26, 0.88);
+        --stroke: rgba(255, 255, 255, 0.08);
+        --stroke2: rgba(255, 255, 255, 0.12);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.7);
+        --muted2: rgba(255, 255, 255, 0.55);
+        --good: #3cff7a;
+        --green: #2bff7c;
+        --yellow: #ffd12f;
+        --orange: #ff7a18;
+        --red: #ff2e4f;
+        --black: #05060a;
+        --shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+        --shadow2: 0 18px 48px rgba(0, 0, 0, 0.45);
+        --radius: 18px;
+        --radius2: 22px;
+        --max: 1140px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          'Apple Color Emoji',
+          'Segoe UI Emoji';
+        color: var(--text);
+        background: radial-gradient(1200px 700px at 18% -20%, rgb(0 81 31), #0031085e 55%),
+          radial-gradient(900px 600px at 72% -10%, rgb(255 199 0 / 97%), #304f00e8 60%),
+          radial-gradient(900px 650px at 95% 40%, rgba(255, 122, 24, 0.12), #08fd971f 58%),
+          radial-gradient(900px 700px at 35% 115%, rgb(255 249 0), transparent 60%), #ffd473;
+        overflow-x: hidden;
+      }
+
+      .bgFx {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+        opacity: 0.34;
+      }
+
+      .bgFx .fx {
+        position: absolute;
+        left: var(--x);
+        top: 0;
+        width: var(--s);
+        height: var(--s);
+        opacity: var(--o, 0.65);
+        will-change: transform, opacity;
+        transform: translate3d(0, calc(var(--y0, -30) * 1vh), 0) rotate(0deg) scale(var(--k, 1));
+        filter: blur(var(--blur, 0px));
+        animation:
+          fxFall var(--d, 12s) linear infinite,
+          fxTwinkle calc(var(--d, 12s) * 0.55) ease-in-out infinite;
+        animation-delay: var(--delay, 0s);
+      }
+
+      .bgFx .fxBall {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.8), transparent 44%),
+          radial-gradient(circle at 40% 80%, rgba(0, 0, 0, 0.18), transparent 52%),
+          linear-gradient(135deg, var(--ballA, rgba(255, 209, 47, 0.92)), var(--ballB, rgba(255, 46, 79, 0.42)));
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
+        filter: saturate(1.12);
+      }
+
+      .bgFx .fxBall::before {
+        content: '';
+        position: absolute;
+        inset: 18%;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.16);
+      }
+
+      .bgFx .fxBall::after {
+        content: attr(data-txt);
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-weight: 950;
+        letter-spacing: -0.02em;
+        color: rgba(0, 0, 0, 0.62);
+        font-size: calc(var(--s) * 0.34);
+        transform: translateY(0.5px);
+      }
+
+      .bgFx .fxCoin {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.78), transparent 46%),
+          radial-gradient(circle at 60% 80%, rgba(0, 0, 0, 0.2), transparent 55%),
+          linear-gradient(135deg, rgba(255, 209, 47, 0.92), rgba(255, 122, 24, 0.36));
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
+        filter: saturate(1.08);
+      }
+
+      .bgFx .fxCoin::before {
+        content: '';
+        position: absolute;
+        inset: 10%;
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .bgFx .fxCoin::after {
+        content: '$';
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-weight: 950;
+        color: rgba(0, 0, 0, 0.58);
+        font-size: calc(var(--s) * 0.38);
+      }
+
+      .bgFx .fxBill {
+        width: calc(var(--s) * 2.45);
+        height: calc(var(--s) * 1.15);
+        border-radius: 0;
+        clip-path: polygon(0 50%, 7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(135deg, rgba(43, 255, 124, 0.34), rgba(255, 209, 47, 0.16));
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
+        filter: saturate(1.06);
+      }
+
+      .bgFx .fxBill::before {
+        content: '';
+        position: absolute;
+        inset: 10%;
+        border-radius: 0;
+        clip-path: polygon(0 50%, 7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%);
+        border: 1px dashed rgba(255, 255, 255, 0.24);
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      .bgFx .fxBill::after {
+        content: '$';
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-weight: 950;
+        color: rgba(0, 0, 0, 0.52);
+        font-size: calc(var(--s) * 0.36);
+      }
+
+      .bgFx .fxClover {
+        width: calc(var(--s) * 1.1);
+        height: calc(var(--s) * 1.1);
+        border-radius: 0;
+        background:
+          radial-gradient(circle at 50% 32%, rgba(43, 255, 124, 0.92) 0 34%, transparent 35%),
+          radial-gradient(circle at 31% 60%, rgba(43, 255, 124, 0.92) 0 34%, transparent 35%),
+          radial-gradient(circle at 69% 60%, rgba(43, 255, 124, 0.92) 0 34%, transparent 35%),
+          radial-gradient(circle at 50% 56%, rgba(0, 120, 52, 0.46) 0 15%, transparent 16%),
+          radial-gradient(circle at 42% 28%, rgba(255, 255, 255, 0.72), transparent 34%);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.14);
+        filter: saturate(1.18);
+      }
+
+      .bgFx .fxClover::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 60%;
+        width: 14%;
+        height: 58%;
+        transform: translateX(-40%) rotate(22deg);
+        border-radius: 999px;
+        background: linear-gradient(180deg, rgba(43, 255, 124, 0.92), rgba(0, 120, 52, 0.78));
+        opacity: 0.92;
+      }
+
+      @keyframes fxFall {
+        0% {
+          transform: translate3d(0, calc(var(--y0, -30) * 1vh), 0) rotate(0deg) scale(var(--k, 1));
+        }
+        42% {
+          transform: translate3d(calc(var(--dx, 0px) * -0.6), 48vh, 0) rotate(calc(var(--rot, 360deg) * 0.48))
+            scale(var(--k, 1));
+        }
+        100% {
+          transform: translate3d(var(--dx, 0px), 120vh, 0) rotate(var(--rot, 360deg)) scale(var(--k, 1));
+        }
+      }
+
+      @keyframes fxTwinkle {
+        0% {
+          opacity: calc(var(--o, 0.65) * 0.8);
+        }
+        50% {
+          opacity: var(--o, 0.65);
+        }
+        100% {
+          opacity: calc(var(--o, 0.65) * 0.78);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .bgFx .fx {
+          animation: none;
+        }
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        width: min(var(--max), calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .skipLink {
+        position: absolute;
+        left: -999px;
+        top: 12px;
+        padding: 10px 12px;
+        background: rgba(0, 0, 0, 0.85);
+        border: 1px solid var(--stroke2);
+        border-radius: 12px;
+      }
+
+      .skipLink:focus {
+        left: 12px;
+        z-index: 999;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        border-bottom: 1px solid var(--stroke);
+        background: rgba(5, 6, 10, 0.66);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: transparent url('fotos%20loteria/Bingazo.png') center / contain no-repeat;
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+        border: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo::after {
+        content: '';
+        position: absolute;
+        inset: -60% -60%;
+        background: radial-gradient(circle at 40% 30%, rgba(255, 255, 255, 0.45), transparent 45%);
+        transform: rotate(12deg);
+        display: none;
+      }
+
+      .brandTitle {
+        display: grid;
+        gap: 2px;
+        line-height: 1.12;
+      }
+
+      .brandName {
+        font-weight: 950;
+        letter-spacing: 0.3px;
+        font-size: 15px;
+      }
+
+      .brandTag {
+        color: var(--muted2);
+        font-weight: 650;
+        font-size: 12px;
+      }
+
+      .navLinks {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid var(--stroke);
+        background: rgba(18, 20, 28, 0.55);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+        color: rgba(255, 255, 255, 0.86);
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background 160ms ease;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .pill:hover {
+        transform: translateY(-1px);
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(18, 20, 28, 0.72);
+      }
+
+      .pillPrimary {
+        border-color: rgba(43, 255, 124, 0.28);
+        background: linear-gradient(135deg, rgba(43, 255, 124, 0.14), rgba(255, 209, 47, 0.12), rgba(255, 122, 24, 0.08));
+      }
+
+      .pillIcon {
+        width: 18px;
+        height: 18px;
+        opacity: 0.92;
+      }
+
+      .main {
+        padding: 26px 0 58px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        border-radius: var(--radius2);
+        border: 1px solid var(--stroke);
+        background: linear-gradient(180deg, rgba(18, 20, 28, 0.72), rgba(11, 12, 18, 0.72));
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .hero::before {
+        content: '';
+        position: absolute;
+        inset: -40% -10%;
+        background: radial-gradient(circle at 20% 30%, rgba(43, 255, 124, 0.18), transparent 55%),
+          radial-gradient(circle at 62% 24%, rgba(255, 209, 47, 0.18), transparent 52%),
+          radial-gradient(circle at 85% 70%, rgba(255, 46, 79, 0.14), transparent 52%),
+          radial-gradient(circle at 40% 90%, rgba(255, 122, 24, 0.12), transparent 56%);
+        filter: blur(6px);
+        opacity: 0.95;
+        pointer-events: none;
+      }
+
+      .heroInner {
+        position: relative;
+        padding: 28px;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 20px;
+        align-items: stretch;
+      }
+
+      .kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(10, 11, 16, 0.5);
+        color: rgba(255, 255, 255, 0.86);
+        font-weight: 760;
+        font-size: 12px;
+        letter-spacing: 0.22px;
+      }
+
+      .kDot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: conic-gradient(from 90deg, var(--green), var(--yellow), var(--orange), var(--red), var(--green));
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+      }
+
+      .heroTitle {
+        margin: 14px 0 10px;
+        font-size: clamp(26px, 3.2vw, 42px);
+        line-height: 1.06;
+        letter-spacing: -0.9px;
+      }
+
+      .heroLead {
+        margin: 0 0 14px;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 15px;
+        line-height: 1.45;
+        max-width: 62ch;
+      }
+
+      .heroStats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .stat {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.48);
+        padding: 12px;
+      }
+
+      .statLabel {
+        color: var(--muted2);
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .statValue {
+        margin-top: 6px;
+        font-weight: 950;
+        letter-spacing: -0.3px;
+        font-size: 16px;
+      }
+
+      .heroCard {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: linear-gradient(180deg, rgba(10, 11, 16, 0.62), rgba(7, 8, 12, 0.72));
+        padding: 16px;
+        box-shadow: var(--shadow2);
+        display: grid;
+        gap: 12px;
+      }
+
+      .heroCardTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .heroCardTitle {
+        font-weight: 900;
+        letter-spacing: -0.2px;
+      }
+
+      .heroCardSub {
+        color: var(--muted2);
+        font-size: 12px;
+        font-weight: 650;
+        margin-top: 2px;
+      }
+
+      .heroArt {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        min-height: 170px;
+        display: grid;
+        place-items: center;
+      }
+
+      .heroArt img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .heroCardCta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .heroLeftCta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+        justify-content: center;
+      }
+
+      #myCartonsBtn {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 14px;
+        font-weight: 950;
+      }
+
+      .myCartonsCta {
+        width: min(520px, 100%);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .myCartonsLogo {
+        width: 260px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.45));
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid var(--stroke);
+        background: rgba(18, 20, 28, 0.68);
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 800;
+        cursor: pointer;
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background 160ms ease;
+        user-select: none;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(18, 20, 28, 0.82);
+      }
+
+      .btnPrimary {
+        border-color: rgba(43, 255, 124, 0.32);
+        background: linear-gradient(135deg, rgba(43, 255, 124, 0.18), rgba(255, 209, 47, 0.14), rgba(255, 122, 24, 0.08));
+      }
+
+      .btnDanger {
+        border-color: rgba(255, 46, 79, 0.32);
+        background: linear-gradient(135deg, rgba(255, 46, 79, 0.14), rgba(255, 122, 24, 0.1));
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .panel {
+        border-radius: var(--radius);
+        border: 1px solid var(--stroke);
+        background: var(--panel);
+        box-shadow: var(--shadow2);
+        overflow: hidden;
+      }
+
+      .panelHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--stroke);
+        background: rgba(8, 9, 14, 0.35);
+      }
+
+      .panelTitle {
+        font-weight: 900;
+        letter-spacing: -0.2px;
+      }
+
+      .panelHint {
+        color: var(--muted2);
+        font-weight: 650;
+        font-size: 12px;
+      }
+
+      .panelBody {
+        padding: 14px 16px 16px;
+      }
+
+      .games {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .gameCard {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.5);
+        padding: 12px;
+        display: grid;
+        gap: 8px;
+        cursor: pointer;
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          background 180ms ease;
+        min-height: 96px;
+      }
+
+      .gameCard:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.18);
+        background: rgba(10, 11, 16, 0.66);
+      }
+
+      .gameCard.isActive {
+        border-color: rgba(43, 255, 124, 0.34);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        background: linear-gradient(135deg, rgba(43, 255, 124, 0.16), rgba(255, 209, 47, 0.1), rgba(255, 46, 79, 0.08));
+      }
+
+      .gameTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .gameName {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+      }
+
+      .gameMeta {
+        color: var(--muted2);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.25);
+        color: rgba(255, 255, 255, 0.88);
+        font-weight: 800;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .badgeGreen {
+        border-color: rgba(43, 255, 124, 0.24);
+        color: rgba(195, 255, 216, 0.95);
+      }
+
+      .badgeYellow {
+        border-color: rgba(255, 209, 47, 0.22);
+        color: rgba(255, 243, 201, 0.95);
+      }
+
+      .badgeRed {
+        border-color: rgba(255, 46, 79, 0.22);
+        color: rgba(255, 206, 214, 0.95);
+      }
+
+      .pickerTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      .picked {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        max-height: 84px;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.25);
+        font-weight: 950;
+        letter-spacing: -0.2px;
+      }
+
+      .chip.isHot {
+        border-color: rgba(43, 255, 124, 0.3);
+        background: rgba(43, 255, 124, 0.1);
+      }
+
+      .chip.isWarn {
+        border-color: rgba(255, 209, 47, 0.28);
+        background: rgba(255, 209, 47, 0.08);
+      }
+
+      .chipGhost {
+        color: var(--muted2);
+        font-weight: 800;
+      }
+
+      .seriesRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 10px 0 6px;
+      }
+
+      .seriesTabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .seriesBtn {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.18);
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 950;
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .seriesBtn.isActive {
+        border-color: rgba(255, 209, 47, 0.32);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+      }
+
+      .seriesCount {
+        height: 22px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.86);
+        font-weight: 950;
+        font-size: 12px;
+        display: grid;
+        place-items: center;
+      }
+
+      .seriesPager {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .numberGrid {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .numBtn {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.18) 26%, rgba(0, 0, 0, 0.12) 66%),
+          radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6) 72%),
+          linear-gradient(135deg, rgba(255, 209, 47, 0.28), rgba(255, 122, 24, 0.14), rgba(43, 255, 124, 0.16));
+        border-radius: 999px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 950;
+        padding: 0;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition:
+          transform 150ms ease,
+          border-color 150ms ease,
+          background 150ms ease;
+        user-select: none;
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+      }
+
+      .numLabel {
+        width: 58%;
+        height: 58%;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.9);
+        color: rgba(0, 0, 0, 0.88);
+        border: 1px solid rgba(0, 0, 0, 0.18);
+        box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.16);
+        transform: translateZ(0);
+      }
+
+      @keyframes ballSpin {
+        from {
+          transform: translateY(-1px) rotateY(0deg);
+        }
+        to {
+          transform: translateY(-1px) rotateY(360deg);
+        }
+      }
+
+      .numBtn:hover:not(:disabled) {
+        animation: ballSpin 760ms linear infinite;
+        border-color: rgba(255, 255, 255, 0.18);
+        filter: brightness(1.06);
+      }
+
+      .numBtn.isSelected {
+        border-color: rgba(43, 255, 124, 0.38);
+        background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.18) 26%, rgba(0, 0, 0, 0.12) 66%),
+          radial-gradient(circle at 50% 55%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.55) 72%),
+          linear-gradient(135deg, rgba(43, 255, 124, 0.55), rgba(255, 209, 47, 0.35), rgba(255, 46, 79, 0.12));
+        box-shadow: 0 18px 46px rgba(0, 0, 0, 0.35);
+      }
+
+      .numBtn.isSelected .numLabel {
+        background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88) 55%, rgba(255, 209, 47, 0.35));
+        border-color: rgba(43, 255, 124, 0.35);
+      }
+
+      .numBtn:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .formRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .label {
+        color: var(--muted2);
+        font-weight: 750;
+        font-size: 12px;
+      }
+
+      .control {
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.55);
+        color: rgba(255, 255, 255, 0.92);
+        padding: 0 12px;
+        font-weight: 800;
+        outline: none;
+      }
+
+      .control:focus {
+        border-color: rgba(255, 209, 47, 0.34);
+        box-shadow: 0 0 0 4px rgba(255, 209, 47, 0.12);
+      }
+
+      .controlSmall {
+        height: 38px;
+        border-radius: 999px;
+        padding: 0 12px;
+        font-weight: 950;
+      }
+
+      .controlStatic {
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.55);
+        color: rgba(255, 255, 255, 0.92);
+        padding: 0 12px;
+        font-weight: 950;
+        display: flex;
+        align-items: center;
+      }
+
+      .sliderRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+        align-items: center;
+      }
+
+      @media (max-width: 900px) {
+        .sliderRow {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      input[type='range'] {
+        width: 100%;
+        height: 4px;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        outline: none;
+      }
+
+      input[type='range']::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 2px solid rgba(43, 255, 124, 0.5);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+      }
+
+      input[type='range']::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 2px solid rgba(43, 255, 124, 0.5);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+      }
+
+      input[type='range']::-moz-range-track {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+      }
+
+      .payBox {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.46);
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .payBtn {
+        width: 100%;
+      }
+
+      .payGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .payTile {
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(18, 20, 28, 0.55);
+        padding: 10px 10px 12px;
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+        user-select: none;
+      }
+
+      .payIcon {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.92);
+      }
+
+      .payIcon svg {
+        width: 26px;
+        height: 26px;
+      }
+
+      .payName {
+        color: rgba(255, 255, 255, 0.78);
+        font-weight: 900;
+        font-size: 12px;
+        line-height: 1.1;
+        text-align: center;
+      }
+
+      .payStep {
+        color: rgba(255, 255, 255, 0.72);
+        font-weight: 950;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        text-align: center;
+      }
+
+      .testimonials {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.46);
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .testimonialsGrid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .testimonialsGrid > div {
+        max-width: 360px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .testimonialVideo {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.35);
+        display: block;
+        object-fit: cover;
+      }
+
+      .testimonialMeta {
+        margin-top: 8px;
+        font-size: 12px;
+        font-weight: 850;
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .drawsCenter {
+        display: grid;
+        place-items: center;
+        margin-top: 10px;
+      }
+
+      .drawsBtn {
+        width: min(280px, 100%);
+      }
+
+      .drawsActions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 12px;
+      }
+
+      .drawsGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .hint {
+        color: var(--muted2);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .slip {
+        display: grid;
+        gap: 12px;
+      }
+
+      .slipTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .slipTotal {
+        display: grid;
+        gap: 4px;
+        text-align: right;
+      }
+
+      .slipTotalLabel {
+        color: var(--muted2);
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .slipTotalValue {
+        font-weight: 950;
+        letter-spacing: -0.4px;
+        font-size: 20px;
+      }
+
+      .slipList {
+        display: grid;
+        gap: 10px;
+      }
+
+      .slipBlockTitle {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
+
+      .slipScroll {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.16);
+        padding: 10px;
+        max-height: 160px;
+        overflow: auto;
+        display: grid;
+        gap: 8px;
+      }
+
+      .slipNote {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.14);
+        padding: 10px 12px;
+        max-height: 240px;
+        overflow: auto;
+      }
+
+      .rulesList {
+        margin: 8px 0 0;
+        padding-left: 16px;
+        display: grid;
+        gap: 6px;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .slipBannerImg {
+        width: 100%;
+        max-width: min(440px, 100%);
+        margin: 12px auto 2px;
+        display: block;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38);
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .ticket {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.5);
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .ticketTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .ticketTitle {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+      }
+
+      .ticketMeta {
+        color: var(--muted2);
+        font-weight: 700;
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      .ticketNums {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .ticketNums .chip {
+        height: 32px;
+        min-width: 32px;
+      }
+
+      .bingoStrip {
+        display: flex;
+        gap: 10px;
+        overflow: auto;
+        padding-bottom: 6px;
+      }
+
+      .bingoCard {
+        min-width: 220px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.16);
+        padding: 10px;
+      }
+
+      .bingoCardTop {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .bingoCardTitle {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+        font-size: 12px;
+        line-height: 1.1;
+      }
+
+      .bingoCardMeta {
+        color: var(--muted2);
+        font-weight: 750;
+        font-size: 11px;
+        margin-top: 4px;
+      }
+
+      .bingoCardPrice {
+        font-weight: 950;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.9);
+        white-space: nowrap;
+      }
+
+      .bingoGrid {
+        display: grid;
+        grid-template-columns: repeat(9, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .bingoCell {
+        height: 24px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-weight: 950;
+        font-size: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .bingoCell.isBlank {
+        background: transparent;
+        border: 1px dashed rgba(255, 255, 255, 0.14);
+        opacity: 0.55;
+      }
+
+      .rulesTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 12px;
+      }
+
+      .rulesTable th,
+      .rulesTable td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .rulesTable th {
+        color: rgba(255, 255, 255, 0.86);
+        font-weight: 950;
+      }
+
+      .rulesText {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .miniRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.82);
+        font-weight: 750;
+      }
+
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 6px 0;
+      }
+
+      .promoGrid {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .promo {
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 11, 16, 0.5);
+        overflow: hidden;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+      }
+
+      .promoArt {
+        height: 160px;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.18);
+        padding: 10px;
+      }
+
+      .promoArt img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        display: block;
+      }
+
+      .promoBody {
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .promoTitle {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+      }
+
+      .promoText {
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .footer {
+        margin-top: 18px;
+        border-top: 1px solid var(--stroke);
+        padding: 18px 0 22px;
+        color: var(--muted2);
+        font-weight: 650;
+        font-size: 12px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 100;
+        display: none;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(8, 9, 14, 0.75);
+        box-shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+        padding: 12px 14px;
+        max-width: min(420px, calc(100% - 36px));
+        backdrop-filter: blur(14px);
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .toastDot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        margin-top: 4px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(43, 255, 124, 0.9), rgba(255, 209, 47, 0.8));
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+        flex: 0 0 auto;
+      }
+
+      .toastText {
+        display: grid;
+        gap: 4px;
+      }
+
+      .toastTitle {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+      }
+
+      .toastBody {
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .modalOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        display: none;
+        z-index: 90;
+        padding: 18px;
+      }
+
+      .modal {
+        width: min(560px, 100%);
+        margin: 8vh auto 0;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(10, 11, 16, 0.85);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .modalTop {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .modalTitle {
+        font-weight: 950;
+        letter-spacing: -0.2px;
+      }
+
+      .modalClose {
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.28);
+        color: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+        font-size: 18px;
+      }
+
+      .modalBody {
+        padding: 14px 16px 16px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .modalBody p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.76);
+        line-height: 1.45;
+      }
+
+      .kv {
+        display: grid;
+        gap: 10px;
+      }
+
+      .kvRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.18);
+        font-weight: 750;
+      }
+
+      @media (max-width: 980px) {
+        .heroInner {
+          grid-template-columns: 1fr;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .games {
+          grid-template-columns: 1fr;
+        }
+        .promoGrid {
+          grid-template-columns: 1fr;
+        }
+        .numberGrid {
+          grid-template-columns: repeat(8, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 520px) {
+        .container {
+          width: min(var(--max), calc(100% - 28px));
+        }
+        .heroInner {
+          padding: 18px;
+        }
+        .heroStats {
+          grid-template-columns: 1fr;
+        }
+        .formRow {
+          grid-template-columns: 1fr;
+        }
+        .numberGrid {
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skipLink" href="#plataforma">Ir al contenido</a>
+    <div class="bgFx" aria-hidden="true">
+      <span
+        class="fx fxBall"
+        style="--x: 8%; --s: 56px; --d: 12s; --delay: -8s; --o: 0.62; --dx: 70px; --rot: 540deg; --y0: -44; --ballA: rgba(255, 209, 47, 0.95); --ballB: rgba(255, 46, 79, 0.44)"
+        data-txt="7"
+      ></span>
+      <span class="fx fxCoin" style="--x: 16%; --s: 44px; --d: 14s; --delay: -2s; --o: 0.55; --dx: -80px; --rot: 720deg; --y0: -56"></span>
+      <span class="fx fxBill" style="--x: 12%; --s: 46px; --d: 16s; --delay: -11s; --o: 0.46; --dx: 90px; --rot: 220deg; --y0: -64"></span>
+
+      <span
+        class="fx fxBall"
+        style="--x: 30%; --s: 62px; --d: 13s; --delay: -9s; --o: 0.56; --dx: -95px; --rot: 520deg; --y0: -48; --ballA: rgba(43, 255, 124, 0.92); --ballB: rgba(255, 209, 47, 0.42)"
+        data-txt="5"
+      ></span>
+      <span class="fx fxCoin" style="--x: 38%; --s: 52px; --d: 15s; --delay: -6s; --o: 0.5; --dx: 85px; --rot: 760deg; --y0: -58"></span>
+      <span class="fx fxBill" style="--x: 44%; --s: 56px; --d: 18s; --delay: -15s; --o: 0.44; --dx: -120px; --rot: 260deg; --y0: -70"></span>
+
+      <span
+        class="fx fxBall"
+        style="--x: 54%; --s: 50px; --d: 12.5s; --delay: -4s; --o: 0.54; --dx: 80px; --rot: 560deg; --y0: -52; --ballA: rgba(255, 122, 24, 0.92); --ballB: rgba(43, 255, 124, 0.38)"
+        data-txt="2"
+      ></span>
+      <span class="fx fxCoin" style="--x: 62%; --s: 46px; --d: 14.5s; --delay: -12s; --o: 0.48; --dx: -70px; --rot: 680deg; --y0: -62"></span>
+      <span class="fx fxBill" style="--x: 68%; --s: 50px; --d: 17s; --delay: -7s; --o: 0.42; --dx: 110px; --rot: 240deg; --y0: -68"></span>
+
+      <span
+        class="fx fxBall"
+        style="--x: 78%; --s: 58px; --d: 13.5s; --delay: -10s; --o: 0.52; --dx: -90px; --rot: 600deg; --y0: -46; --ballA: rgba(255, 46, 79, 0.86); --ballB: rgba(255, 209, 47, 0.42)"
+        data-txt="9"
+      ></span>
+      <span class="fx fxCoin" style="--x: 86%; --s: 50px; --d: 15.5s; --delay: -5s; --o: 0.46; --dx: 80px; --rot: 740deg; --y0: -60"></span>
+      <span class="fx fxBill" style="--x: 92%; --s: 44px; --d: 19s; --delay: -14s; --o: 0.4; --dx: -100px; --rot: 230deg; --y0: -72"></span>
+
+      <span class="fx fxCoin" style="--x: 24%; --s: 34px; --d: 11.5s; --delay: -3s; --o: 0.38; --dx: 60px; --rot: 820deg; --y0: -64; --blur: 0.8px; --k: 0.92"></span>
+      <span class="fx fxBill" style="--x: 50%; --s: 38px; --d: 12.8s; --delay: -9s; --o: 0.34; --dx: -70px; --rot: 260deg; --y0: -78; --blur: 0.9px; --k: 0.9"></span>
+      <span class="fx fxBall" style="--x: 72%; --s: 36px; --d: 11.8s; --delay: -6s; --o: 0.36; --dx: 55px; --rot: 520deg; --y0: -80; --ballA: rgba(43, 255, 124, 0.92); --ballB: rgba(255, 46, 79, 0.36); --blur: 0.9px; --k: 0.9" data-txt="1"></span>
+
+      <span class="fx fxClover" style="--x: 20%; --s: 42px; --d: 15.2s; --delay: -8s; --o: 0.4; --dx: 70px; --rot: 520deg; --y0: -82"></span>
+      <span class="fx fxClover" style="--x: 46%; --s: 54px; --d: 18.5s; --delay: -13s; --o: 0.36; --dx: -90px; --rot: 640deg; --y0: -72"></span>
+      <span class="fx fxClover" style="--x: 66%; --s: 38px; --d: 13.8s; --delay: -5s; --o: 0.34; --dx: 85px; --rot: 580deg; --y0: -90; --blur: 0.7px; --k: 0.92"></span>
+      <span class="fx fxClover" style="--x: 88%; --s: 46px; --d: 16.6s; --delay: -10s; --o: 0.32; --dx: -70px; --rot: 700deg; --y0: -86; --blur: 0.8px; --k: 0.9"></span>
+    </div>
+
+    <div class="topbar">
+      <div class="container">
+        <div class="nav">
+          <div class="brand" aria-label="Marca">
+            <div class="logo" aria-hidden="true"></div>
+            <div class="brandTitle">
+              <div class="brandName">Lotería Pro</div>
+              <div class="brandTag">Plataforma de juegos · demo UX</div>
+            </div>
+          </div>
+
+          <div class="navLinks" aria-label="Acciones">
+            <a class="pill" href="#promos">
+              <svg class="pillIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M4 8.2c0-1.2 1-2.2 2.2-2.2h11.6c1.2 0 2.2 1 2.2 2.2v9.6c0 1.2-1 2.2-2.2 2.2H6.2C5 22 4 21 4 19.8V8.2Z"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                />
+                <path d="M8 11h8M8 14h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+              </svg>
+              Promos
+            </a>
+            <button class="pill pillPrimary" type="button" id="openCheckoutBtn">
+              <svg class="pillIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M7 6h14l-2 9H8L7 6Z"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"
+                />
+                <path d="M6 6H3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                <path
+                  d="M9.2 20.2a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M17.6 20.2a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"
+                  fill="currentColor"
+                />
+              </svg>
+              Abrir slip
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="main" id="plataforma">
+      <div class="container">
+        <section class="hero" aria-label="Hero">
+          <div class="heroInner">
+            <div>
+              <div class="kicker">
+                <span class="kDot" aria-hidden="true"></span>
+                Bingo y sorteos · elige cartones · compra rápida
+              </div>
+              <h1 class="heroTitle">Elige tus cartones disponibles y compra en segundos</h1>
+              <p class="heroLead">
+                Plataforma demo con UI profesional: seriales de cartones, slip claro, premios destacados y checkout
+                directo.
+              </p>
+              <div class="heroStats" aria-label="Resumen rápido">
+                <div class="stat">
+                  <div class="statLabel">Juegos disponibles</div>
+                  <div class="statValue" id="heroGames">—</div>
+                </div>
+                <div class="stat">
+                  <div class="statLabel">Próximo sorteo</div>
+                  <div class="statValue" id="heroDraw">—</div>
+                </div>
+                <div class="stat">
+                  <div class="statLabel">Jackpot estimado</div>
+                  <div class="statValue" id="heroJackpot">—</div>
+                </div>
+              </div>
+              <div class="heroLeftCta">
+                <div class="myCartonsCta">
+                  <button class="btn" type="button" id="myCartonsBtn">Mis cartones</button>
+                  <img class="myCartonsLogo" src="fotos%20loteria/Bingazo.png" alt="Bingazo" loading="lazy" decoding="async" />
+                </div>
+              </div>
+            </div>
+
+            <aside class="heroCard" aria-label="Premio destacado">
+              <div class="heroCardTop">
+                <div>
+                  <div class="heroCardTitle">Premio mayor</div>
+                  <div class="heroCardSub">Referencia visual + mensaje de confianza</div>
+                </div>
+                <span class="badge badgeYellow" id="heroPrizeBadge">Promo</span>
+              </div>
+              <div class="heroArt">
+                <img id="heroPrizeImg" alt="Premio mayor" loading="lazy" />
+              </div>
+              <div class="heroCardCta">
+                <a class="btn btnPrimary" href="#jugar">Jugar ahora</a>
+                <a class="btn" href="#premios">Ver premios</a>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <div class="grid" id="jugar">
+          <section class="panel" aria-label="Seleccionar juego y cartones">
+            <div class="panelHeader">
+              <div>
+                <div class="panelTitle">1) Elige un juego</div>
+                <div class="panelHint">Promos visibles + reglas claras</div>
+              </div>
+              <span class="badge badgeGreen" id="activeGameBadge">—</span>
+            </div>
+            <div class="panelBody">
+              <div class="games" id="games"></div>
+            </div>
+
+            <div class="panelHeader">
+              <div>
+                <div class="panelTitle">2) Selecciona tus cartones</div>
+                <div class="panelHint" id="pickerHint">—</div>
+              </div>
+              <div class="actions">
+                <input
+                  id="desiredPicksInput"
+                  class="control controlSmall"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  step="1"
+                  placeholder="Auto"
+                  aria-label="Cantidad para Auto"
+                />
+                <select id="autoPicks" class="control controlSmall" aria-label="Opciones rápidas (auto)"></select>
+                <button class="btn" type="button" id="randomBtn">Auto</button>
+                <button class="btn btnDanger" type="button" id="clearBtn">Limpiar</button>
+              </div>
+            </div>
+            <div class="panelBody">
+              <div class="pickerTop">
+                <div class="picked" id="picked"></div>
+                <div class="hint" id="pickedHint">—</div>
+              </div>
+              <div class="seriesRow" aria-label="Selección de serie">
+                <div class="seriesTabs" id="seriesTabs"></div>
+                <div class="seriesPager">
+                  <button class="btn" type="button" id="seriesPrevBtn" aria-label="Página anterior">‹</button>
+                  <div class="hint" id="seriesPageHint">—</div>
+                  <button class="btn" type="button" id="seriesNextBtn" aria-label="Página siguiente">›</button>
+                </div>
+              </div>
+              <div class="numberGrid" id="numberGrid" aria-label="Selector de cartones"></div>
+
+              <div class="formRow" aria-label="Configuración de jugada">
+                <div class="field">
+                  <div class="label">Precio fijo por cartón</div>
+                  <div class="controlStatic" id="unitPrice">—</div>
+                </div>
+                <div class="field">
+                  <div class="label">Total a pagar (selección actual)</div>
+                  <div class="controlStatic" id="pickTotal">$0.00</div>
+                  <div class="hint">Cartones elegidos: <span id="pickedCount">0</span></div>
+                </div>
+              </div>
+
+              <div class="sliderRow" aria-label="Duración y pago">
+                <div class="field">
+                  <div class="label">Participar por</div>
+                  <div class="drawsCenter">
+                    <button class="btn drawsBtn" type="button" id="drawsOpenBtn">Sorteos: 1</button>
+                  </div>
+                  <div class="hint" id="drawsHint">1 sorteo seleccionado.</div>
+                  <div class="drawsActions">
+                    <button class="btn btnPrimary" type="button" id="addTicketBtn">Agregar al slip</button>
+                    <button class="btn" type="button" id="quickComboBtn">Combo promo</button>
+                  </div>
+                </div>
+                <div class="payBox" aria-label="Pago rápido">
+                  <div class="payStep" aria-label="Paso 1">Paso 1 - Elige un método de pago</div>
+                  <div class="payGrid" aria-label="Métodos de pago">
+                    <div class="payTile" role="button" tabindex="0" aria-label="Binance Pay">
+                      <div class="payIcon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 2 20 10l-2 2-6-6-6 6-2-2 8-8Zm0 6 6 6-6 6-6-6 6-6Zm-4 4 4 4 4-4-4-4-4 4Z" fill="currentColor"/></svg>
+                      </div>
+                      <div class="payName">Binance Pay</div>
+                    </div>
+                    <div class="payTile" role="button" tabindex="0" aria-label="Visa">
+                      <div class="payIcon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M4 6h16a2 2 0 0 1 2 2v2H2V8a2 2 0 0 1 2-2Zm-2 8v-2h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z" fill="currentColor"/></svg>
+                      </div>
+                      <div class="payName">Visa</div>
+                    </div>
+                    <div class="payTile" role="button" tabindex="0" aria-label="Pago móvil">
+                      <div class="payIcon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 4v12h10V6H7Zm5 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/></svg>
+                      </div>
+                      <div class="payName">Pago móvil</div>
+                    </div>
+                    <div class="payTile" role="button" tabindex="0" aria-label="PayPal">
+                      <div class="payIcon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M9 4h7a5 5 0 0 1 0 10h-4l-1 6H7l2-16Z" fill="currentColor"/></svg>
+                      </div>
+                      <div class="payName">PayPal</div>
+                    </div>
+                  </div>
+                  <div class="payStep" aria-label="Paso 2">Paso 2 - Apreta pagar</div>
+                  <button class="btn btnPrimary payBtn" type="button" id="payNowBtn">Pagar</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="panel" aria-label="Slip de compra">
+            <div class="panelHeader">
+              <div>
+                <div class="panelTitle">Slip</div>
+                <div class="panelHint">Tus jugadas guardadas</div>
+              </div>
+              <span class="badge badgeRed" id="slipCount">0</span>
+            </div>
+            <div class="panelBody slip">
+              <div class="slipTop">
+                <div>
+                  <div class="panelTitle" style="font-size: 14px">Total</div>
+                  <div class="panelHint">Incluye cargo de servicio demo</div>
+                </div>
+                <div class="slipTotal">
+                  <div class="slipTotalLabel">USD</div>
+                  <div class="slipTotalValue" id="slipTotal">$0.00</div>
+                </div>
+              </div>
+              <div class="divider" aria-hidden="true"></div>
+              <div class="slipList" id="slipList" aria-label="Lista de jugadas"></div>
+              <div class="divider" aria-hidden="true"></div>
+              <button class="btn btnPrimary" type="button" id="checkoutBtn">Finalizar compra (demo)</button>
+              <button class="btn" type="button" id="clearSlipBtn">Vaciar slip</button>
+              <div class="slipBlockTitle">Últimos sorteos (muestra)</div>
+              <div class="slipScroll" id="lastDraws" aria-label="Últimos sorteos"></div>
+                            <div class="slipBlockTitle">En esta demo</div>
+              <div class="testimonials" aria-label="Funciones de demostración">
+                <div class="testimonialsGrid" aria-label="Funciones incluidas">
+                  <div><div class="testimonialMeta">Arma una jugada de muestra y revisa el total.</div></div>
+                  <div><div class="testimonialMeta">El slip se guarda en este navegador.</div></div>
+                  <div><div class="testimonialMeta">La demo no procesa apuestas ni pagos.</div></div>
+                </div>
+              </div>
+              <div class="slipBlockTitle">Reglas</div>
+              <div class="slipNote" aria-label="Reglas del juego">
+                <div class="rulesText">
+                  <div style="font-weight: 950">1.</div>
+                  <div>
+                    Los cartones del bingo constarán de veintisiete casillas, distribuidas en tres filas horizontales, cada
+                    una de las cuales contendrá solamente cinco números comprendidos entre el uno y el noventa, ambos
+                    inclusive. La primera columna comprende del 1 al 9; la segunda, del 10 al 19; la tercera, del 20 al 29;
+                    y así sucesivamente hasta la columna novena, del 80 al 90. Nunca existirán tres números en una misma
+                    columna.
+                  </div>
+                  <div style="margin-top: 10px; font-weight: 950">2.</div>
+                  <div>
+                    En cada cartón figurará su precio, número de orden, serie a la que pertenece y número de cartones que
+                    la integran. En el dorso se consignará la tasa fiscal y un extracto de las principales reglas del juego.
+                  </div>
+                  <div style="margin-top: 10px; font-weight: 950">3.</div>
+                  <div>La Fábrica Nacional de Moneda y Timbre confeccionará, para su puesta en circulación, los siguientes juegos:</div>
+                  <table class="rulesTable" aria-label="Series y número de cartones">
+                    <thead>
+                      <tr>
+                        <th>Serie</th>
+                        <th>Número cartones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>A</td><td>90</td></tr>
+                      <tr><td>B</td><td>120</td></tr>
+                      <tr><td>C</td><td>150</td></tr>
+                      <tr><td>D</td><td>180</td></tr>
+                      <tr><td>E</td><td>240</td></tr>
+                      <tr><td>F</td><td>300</td></tr>
+                      <tr><td>G</td><td>360</td></tr>
+                      <tr><td>H</td><td>420</td></tr>
+                      <tr><td>I</td><td>660</td></tr>
+                      <tr><td>J</td><td>840</td></tr>
+                    </tbody>
+                  </table>
+                  <div style="margin-top: 10px">
+                    Para cada serie se confeccionarán cartones de 100, 200, 500 y 1.000 pesetas de valor facial, cumpliéndose
+                    los requisitos de que los cartones que integren cada serie sean todos distintos en sus combinaciones de
+                    línea y bingo. Cada serie se distinguirá por el color del anverso y cada precio por el color del reverso.
+                  </div>
+                  <div style="margin-top: 10px; font-weight: 950">4.</div>
+                  <div>
+                    Solamente podrán emitirse series con número de cartones y precios diferentes a los consignados cuando así
+                    se acuerde por la autoridad competente, a propuesta debidamente fundamentada.
+                  </div>
+                  <ul class="rulesList">
+                    <li>Solo mayores de edad pueden participar.</li>
+                    <li>Resultados mostrados aquí son de muestra (demo).</li>
+                    <li>La compra está sujeta a disponibilidad de cartones.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <section class="panel" id="promos" aria-label="Promociones">
+          <div class="panelHeader">
+            <div>
+              <div class="panelTitle">Promociones</div>
+              <div class="panelHint">Banners limpios para impulsar conversión</div>
+            </div>
+            <span class="badge badgeYellow" id="promoBadge">Activas</span>
+          </div>
+          <div class="panelBody">
+            <div class="promoGrid" id="promoGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="premios" aria-label="Premios">
+          <div class="panelHeader">
+            <div>
+              <div class="panelTitle">Premios referenciales</div>
+              <div class="panelHint">Cards con “foto” y copy corto</div>
+            </div>
+            <span class="badge badgeGreen">Top</span>
+          </div>
+          <div class="panelBody">
+            <div class="promoGrid" id="prizeGrid"></div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="container">
+            <div>Lotería Pro · demo UI/UX para plataformas de azar</div>
+            <div style="margin-top: 6px">© <span id="y"></span> xioleni.com</div>
+            <div style="margin-top: 6px">
+              Cartones: <span id="footerCartones">0</span> · Precio del cartón: <span id="footerUnit">—</span> · Total a
+              pagar: <span id="footerTotal">—</span>
+            </div>
+            <div style="margin-top: 6px">Métodos de pago: Tarjeta · Pago móvil · Transferencia · USDT</div>
+          </div>
+        </footer>
+      </div>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toastDot" aria-hidden="true"></span>
+      <span class="toastText">
+        <span class="toastTitle" id="toastTitle">Listo</span>
+        <span class="toastBody" id="toastBody">—</span>
+      </span>
+    </div>
+
+    <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Modal">
+      <div class="modal">
+        <div class="modalTop">
+          <div class="modalTitle" id="modalTitle">Checkout (demo)</div>
+          <button class="modalClose" type="button" id="modalCloseBtn" aria-label="Cerrar">×</button>
+        </div>
+        <div class="modalBody">
+          <div id="checkoutContent">
+            <p id="modalDesc">
+              Este checkout es una simulación pensada para mostrar UX de compra rápida. Aquí normalmente irían métodos de
+              pago, validación de identidad y comprobantes.
+            </p>
+            <div class="kv" id="checkoutSummary"></div>
+            <div class="actions">
+              <button class="btn btnPrimary" type="button" id="confirmBtn">Confirmar compra (demo)</button>
+              <button class="btn" type="button" id="cancelBtn">Cancelar</button>
+            </div>
+          </div>
+          <div id="cartonContent" hidden>
+            <div class="kv" id="cartonMeta"></div>
+            <div id="cartonPreview" style="margin-top: 10px"></div>
+            <div class="actions" style="margin-top: 14px">
+              <button class="btn btnPrimary" type="button" id="cartonSelectBtn">Seleccionar</button>
+              <button class="btn" type="button" id="cartonCloseBtn">Cerrar</button>
+            </div>
+          </div>
+          <div id="myCartonsContent" hidden>
+            <div class="kv" id="myCartonsSummary"></div>
+            <div id="myCartonsList" style="margin-top: 10px"></div>
+            <div class="actions" style="margin-top: 14px">
+              <button class="btn" type="button" id="myCartonsCloseBtn">Cerrar</button>
+            </div>
+          </div>
+          <div id="drawsContent" hidden>
+            <div class="kv">
+              <div class="kvRow"><span>Sorteos</span><span id="drawsModalValue">—</span></div>
+            </div>
+            <div class="drawsGrid" id="drawsPresetGrid" style="margin-top: 12px">
+              <button class="btn" type="button" data-draws="1">1</button>
+              <button class="btn" type="button" data-draws="2">2</button>
+              <button class="btn" type="button" data-draws="5">5</button>
+              <button class="btn" type="button" data-draws="10">10</button>
+            </div>
+            <div class="formRow" style="margin-top: 12px">
+              <div class="field">
+                <div class="label">Manual</div>
+                <input id="drawsInput" class="control" type="number" min="1" step="1" inputmode="numeric" aria-label="Sorteos manual" />
+                <div class="hint">Elige cualquier cantidad.</div>
+              </div>
+            </div>
+            <div class="actions" style="margin-top: 14px">
+              <button class="btn btnPrimary" type="button" id="drawsSaveBtn">Guardar</button>
+              <button class="btn" type="button" id="drawsCloseBtn">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const GAME_DEFS = [
+        {
+          id: 'bingo-trad',
+          name: 'Bingo Tradicional',
+          picks: 4,
+          price: 2.0,
+          badge: { label: 'Popular', tone: 'green' },
+          subtitle: '4 cartones · 1 ronda',
+        },
+        {
+          id: 'bingo-pack',
+          name: 'Pack Bingo',
+          picks: 8,
+          price: 1.75,
+          badge: { label: 'Ahorro', tone: 'yellow' },
+          subtitle: '8 cartones · mejor chance',
+        },
+        {
+          id: 'bingo-vip',
+          name: 'Bingo VIP',
+          picks: 12,
+          price: 1.5,
+          badge: { label: 'VIP', tone: 'red' },
+          subtitle: '12 cartones · premium',
+        },
+      ]
+
+      const SERIES_DEFS = [
+        { id: 'A', total: 90 },
+        { id: 'B', total: 120 },
+        { id: 'C', total: 150 },
+        { id: 'D', total: 180 },
+        { id: 'E', total: 240 },
+        { id: 'F', total: 300 },
+        { id: 'G', total: 360 },
+        { id: 'H', total: 420 },
+        { id: 'I', total: 660 },
+        { id: 'J', total: 840 },
+      ]
+
+      const LAST_DRAWS = [
+        { id: 'd1', date: '2026-02-22', round: 'Ronda 18:00', balls: [5, 12, 19, 24, 31, 44, 52, 63, 71, 80] },
+        { id: 'd2', date: '2026-02-23', round: 'Ronda 20:00', balls: [3, 9, 17, 22, 35, 41, 57, 66, 74, 88] },
+        { id: 'd3', date: '2026-02-24', round: 'Ronda 14:00', balls: [1, 10, 16, 29, 33, 48, 55, 60, 77, 90] },
+        { id: 'd4', date: '2026-02-24', round: 'Ronda 16:00', balls: [7, 14, 21, 27, 39, 46, 58, 62, 73, 86] },
+      ]
+
+      const PROMOS = [
+        {
+          title: 'Combo fin de semana',
+          text: 'Agrega 2 jugadas y te damos 1 adicional (demo). Ideal para aumentar chances.',
+          tone: 'green',
+          img: 'fotos loteria/combo fin de semana.png',
+          art: { kind: 'promo', seed: 'combo' },
+        },
+        {
+          title: 'Promo relámpago',
+          text: 'Multiplicador x2 sin cargo para juegos rápidos (demo).',
+          tone: 'yellow',
+          img: 'fotos loteria/promo relampago.png',
+          art: { kind: 'promo', seed: 'flash' },
+        },
+        {
+          title: 'Bono de recarga',
+          text: 'Recarga y recibe un bono para tu próxima jugada (demo).',
+          tone: 'red',
+          img: 'fotos loteria/bono de recarga.png',
+          art: { kind: 'promo', seed: 'bonus' },
+        },
+      ]
+
+      const PRIZES = [
+        {
+          title: 'Jackpot Millonario',
+          text: 'Premio mayor estimado para el próximo sorteo.',
+          tone: 'yellow',
+          badge: 'Mega',
+          img: 'fotos loteria/jackpot millonario.png',
+          art: { kind: 'prize', seed: 'jackpot' },
+        },
+        {
+          title: 'Auto 0km',
+          text: 'Premio especial para promociones de temporada.',
+          tone: 'orange',
+          badge: 'Especial',
+          img: 'fotos loteria/auto 0 kilometro.png',
+          art: { kind: 'prize', seed: 'car' },
+        },
+        {
+          title: 'Bono en efectivo',
+          text: 'Gana bonos instantáneos en juegos rápidos.',
+          tone: 'green',
+          badge: 'Instant',
+          img: 'fotos loteria/bono en efectivo.png',
+          art: { kind: 'prize', seed: 'cash' },
+        },
+      ]
+
+      const STORAGE_KEY = 'loteriaPro.slip.v2'
+      const ACTIVE_KEY = 'loteriaPro.active.v1'
+      const SERVICE_FEE_RATE = 0.06
+      const SERIES_PAGE_SIZE = 90
+      const DRAW_DURATION_MS = 1000 * 60 * 60 * 24
+
+      const state = {
+        activeGameId: GAME_DEFS[0].id,
+        activeSeriesId: SERIES_DEFS[0].id,
+        seriesPage: 1,
+        desiredPicks: GAME_DEFS[0].picks,
+        autoPicksCount: GAME_DEFS[0].picks,
+        selected: [],
+        slip: [],
+        activeTickets: [],
+        betAmount: 2,
+        draws: 1,
+      }
+
+      const el = {
+        games: document.getElementById('games'),
+        activeGameBadge: document.getElementById('activeGameBadge'),
+        pickerHint: document.getElementById('pickerHint'),
+        picked: document.getElementById('picked'),
+        pickedHint: document.getElementById('pickedHint'),
+        seriesTabs: document.getElementById('seriesTabs'),
+        seriesPrevBtn: document.getElementById('seriesPrevBtn'),
+        seriesNextBtn: document.getElementById('seriesNextBtn'),
+        seriesPageHint: document.getElementById('seriesPageHint'),
+        numberGrid: document.getElementById('numberGrid'),
+        myCartonsBtn: document.getElementById('myCartonsBtn'),
+        desiredPicksInput: document.getElementById('desiredPicksInput'),
+        autoPicks: document.getElementById('autoPicks'),
+        unitPrice: document.getElementById('unitPrice'),
+        pickTotal: document.getElementById('pickTotal'),
+        pickedCount: document.getElementById('pickedCount'),
+        drawsOpenBtn: document.getElementById('drawsOpenBtn'),
+        drawsHint: document.getElementById('drawsHint'),
+        randomBtn: document.getElementById('randomBtn'),
+        clearBtn: document.getElementById('clearBtn'),
+        addTicketBtn: document.getElementById('addTicketBtn'),
+        quickComboBtn: document.getElementById('quickComboBtn'),
+        slipList: document.getElementById('slipList'),
+        slipTotal: document.getElementById('slipTotal'),
+        slipCount: document.getElementById('slipCount'),
+        clearSlipBtn: document.getElementById('clearSlipBtn'),
+        checkoutBtn: document.getElementById('checkoutBtn'),
+        openCheckoutBtn: document.getElementById('openCheckoutBtn'),
+        promoGrid: document.getElementById('promoGrid'),
+        prizeGrid: document.getElementById('prizeGrid'),
+        heroGames: document.getElementById('heroGames'),
+        heroDraw: document.getElementById('heroDraw'),
+        heroJackpot: document.getElementById('heroJackpot'),
+        heroPrizeImg: document.getElementById('heroPrizeImg'),
+        heroPrizeBadge: document.getElementById('heroPrizeBadge'),
+        lastDraws: document.getElementById('lastDraws'),
+        footerCartones: document.getElementById('footerCartones'),
+        footerUnit: document.getElementById('footerUnit'),
+        footerTotal: document.getElementById('footerTotal'),
+        toast: document.getElementById('toast'),
+        toastTitle: document.getElementById('toastTitle'),
+        toastBody: document.getElementById('toastBody'),
+        modalOverlay: document.getElementById('modalOverlay'),
+        modalTitle: document.getElementById('modalTitle'),
+        checkoutContent: document.getElementById('checkoutContent'),
+        cartonContent: document.getElementById('cartonContent'),
+        myCartonsContent: document.getElementById('myCartonsContent'),
+        drawsContent: document.getElementById('drawsContent'),
+        cartonMeta: document.getElementById('cartonMeta'),
+        cartonPreview: document.getElementById('cartonPreview'),
+        cartonSelectBtn: document.getElementById('cartonSelectBtn'),
+        cartonCloseBtn: document.getElementById('cartonCloseBtn'),
+        myCartonsSummary: document.getElementById('myCartonsSummary'),
+        myCartonsList: document.getElementById('myCartonsList'),
+        myCartonsCloseBtn: document.getElementById('myCartonsCloseBtn'),
+        drawsModalValue: document.getElementById('drawsModalValue'),
+        drawsPresetGrid: document.getElementById('drawsPresetGrid'),
+        drawsInput: document.getElementById('drawsInput'),
+        drawsSaveBtn: document.getElementById('drawsSaveBtn'),
+        drawsCloseBtn: document.getElementById('drawsCloseBtn'),
+        modalCloseBtn: document.getElementById('modalCloseBtn'),
+        cancelBtn: document.getElementById('cancelBtn'),
+        confirmBtn: document.getElementById('confirmBtn'),
+        checkoutSummary: document.getElementById('checkoutSummary'),
+        payNowBtn: document.getElementById('payNowBtn'),
+      }
+
+      function pad3(n) {
+        return String(Number(n)).padStart(3, '0')
+      }
+
+      function cartonSerial(series, n) {
+        return `${series}-${pad3(n)}`
+      }
+
+      function parseCartonId(id) {
+        const raw = String(id || '')
+        const parts = raw.split('-')
+        const series = (parts[0] || '').toUpperCase()
+        const order = Number(parts[1] || 0)
+        if (!series || !Number.isFinite(order) || order <= 0) return null
+        return { series, order }
+      }
+
+      function cartonId(series, order) {
+        return `${String(series || '').toUpperCase()}-${pad3(order)}`
+      }
+
+      function sortCartonIds(a, b) {
+        const pa = parseCartonId(a)
+        const pb = parseCartonId(b)
+        if (!pa && !pb) return String(a).localeCompare(String(b))
+        if (!pa) return 1
+        if (!pb) return -1
+        if (pa.series !== pb.series) return pa.series.localeCompare(pb.series)
+        return pa.order - pb.order
+      }
+
+      function hashString(s) {
+        let h = 2166136261
+        const str = String(s || '')
+        for (let i = 0; i < str.length; i++) {
+          h ^= str.charCodeAt(i)
+          h = Math.imul(h, 16777619)
+        }
+        return h >>> 0
+      }
+
+      function mulberry32(seed) {
+        let t = seed >>> 0
+        return () => {
+          t += 0x6d2b79f5
+          let x = Math.imul(t ^ (t >>> 15), 1 | t)
+          x ^= x + Math.imul(x ^ (x >>> 7), 61 | x)
+          return ((x ^ (x >>> 14)) >>> 0) / 4294967296
+        }
+      }
+
+      function pickOne(rnd, arr) {
+        return arr[Math.floor(rnd() * arr.length)]
+      }
+
+      function shuffled(rnd, arr) {
+        const a = arr.slice()
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(rnd() * (i + 1))
+          const tmp = a[i]
+          a[i] = a[j]
+          a[j] = tmp
+        }
+        return a
+      }
+
+      function sampleUniqueInts(rnd, from, to, count) {
+        const bag = []
+        for (let n = from; n <= to; n++) bag.push(n)
+        const out = []
+        for (let i = 0; i < count; i++) {
+          const idx = Math.floor(rnd() * bag.length)
+          out.push(bag[idx])
+          bag.splice(idx, 1)
+        }
+        return out
+      }
+
+      const BINGO_RANGES = [
+        [1, 9],
+        [10, 19],
+        [20, 29],
+        [30, 39],
+        [40, 49],
+        [50, 59],
+        [60, 69],
+        [70, 79],
+        [80, 90],
+      ]
+
+      const bingoCache = {
+        bySeries: {},
+      }
+
+      function generateBingoGrid({ series, order, attempt }) {
+        const rnd = mulberry32(hashString(`${series}-${order}-${attempt}`))
+        const colCounts = new Array(9).fill(1)
+        const cols = shuffled(rnd, [0, 1, 2, 3, 4, 5, 6, 7, 8])
+        cols.slice(0, 6).forEach((c) => {
+          colCounts[c] = 2
+        })
+
+        const gridMask = Array.from({ length: 3 }, () => new Array(9).fill(false))
+        const remaining = [5, 5, 5]
+
+        const rowOptions1 = [0, 1, 2]
+        const rowOptions2 = [
+          [0, 1],
+          [0, 2],
+          [1, 2],
+        ]
+
+        function assignCol(i) {
+          if (i >= 9) return remaining[0] === 0 && remaining[1] === 0 && remaining[2] === 0
+          const c = colCounts[i]
+          if (c === 1) {
+            for (const r of shuffled(rnd, rowOptions1)) {
+              if (remaining[r] <= 0) continue
+              gridMask[r][i] = true
+              remaining[r] -= 1
+              if (assignCol(i + 1)) return true
+              remaining[r] += 1
+              gridMask[r][i] = false
+            }
+            return false
+          }
+          for (const pair of shuffled(rnd, rowOptions2)) {
+            const [r1, r2] = pair
+            if (remaining[r1] <= 0 || remaining[r2] <= 0) continue
+            gridMask[r1][i] = true
+            gridMask[r2][i] = true
+            remaining[r1] -= 1
+            remaining[r2] -= 1
+            if (assignCol(i + 1)) return true
+            remaining[r1] += 1
+            remaining[r2] += 1
+            gridMask[r1][i] = false
+            gridMask[r2][i] = false
+          }
+          return false
+        }
+
+        if (!assignCol(0)) return null
+
+        const grid = Array.from({ length: 3 }, () => new Array(9).fill(null))
+        for (let c = 0; c < 9; c++) {
+          const count = colCounts[c]
+          const [min, max] = BINGO_RANGES[c]
+          const nums = sampleUniqueInts(rnd, min, max, count).sort((a, b) => a - b)
+          const rows = [0, 1, 2].filter((r) => gridMask[r][c]).sort((a, b) => a - b)
+          rows.forEach((r, idx) => {
+            grid[r][c] = nums[idx] ?? null
+          })
+        }
+        return grid
+      }
+
+      function bingoSignature(grid) {
+        return grid.map((row) => row.map((v) => (v == null ? 'x' : pad3(v))).join(',')).join('|')
+      }
+
+      function getBingoGrid(series, order) {
+        if (!bingoCache.bySeries[series]) bingoCache.bySeries[series] = { byOrder: {}, sig: new Set() }
+        const bucket = bingoCache.bySeries[series]
+        if (bucket.byOrder[order]) return bucket.byOrder[order]
+
+        for (let attempt = 0; attempt < 60; attempt++) {
+          const grid = generateBingoGrid({ series, order, attempt })
+          if (!grid) continue
+          const sig = bingoSignature(grid)
+          if (bucket.sig.has(sig)) continue
+          bucket.sig.add(sig)
+          bucket.byOrder[order] = grid
+          return grid
+        }
+
+        const fallback = generateBingoGrid({ series, order, attempt: 999 })
+        bucket.byOrder[order] = fallback
+        return fallback
+      }
+
+      function renderBingoCard({ series, seriesTotal, order, unitPrice }) {
+        const grid = getBingoGrid(series, order)
+        const wrap = document.createElement('div')
+        wrap.className = 'bingoCard'
+        wrap.innerHTML = `
+          <div class="bingoCardTop">
+            <div>
+              <div class="bingoCardTitle">Serie ${escapeXml(series)} · Cartón ${escapeXml(pad3(order))}/${escapeXml(
+                String(seriesTotal)
+              )}</div>
+              <div class="bingoCardMeta">27 casillas · 3 filas · 5 números por fila</div>
+            </div>
+            <div class="bingoCardPrice">${escapeXml(money(unitPrice))}</div>
+          </div>
+          <div class="bingoGrid" aria-label="Cartón de bingo"></div>
+        `.trim()
+        const gridEl = wrap.querySelector('.bingoGrid')
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 9; c++) {
+            const cell = document.createElement('div')
+            const v = grid?.[r]?.[c]
+            cell.className = `bingoCell ${v == null ? 'isBlank' : ''}`
+            cell.textContent = v == null ? '' : String(v)
+            gridEl.appendChild(cell)
+          }
+        }
+        return wrap
+      }
+
+      function escapeXml(s) {
+        return String(s || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;')
+      }
+
+      function money(n) {
+        const v = Number(n || 0)
+        return `$${v.toFixed(2)}`
+      }
+
+      function clamp(n, a, b) {
+        return Math.max(a, Math.min(b, n))
+      }
+
+      function maxAutoPicksForActiveSeries() {
+        const s = activeSeries()
+        return Math.max(1, Number(s?.total || 1))
+      }
+
+      function setAutoPicksCount(next) {
+        const max = maxAutoPicksForActiveSeries()
+        state.autoPicksCount = clamp(Number(next || 1), 1, max)
+      }
+
+      function syncAutoControls() {
+        const max = maxAutoPicksForActiveSeries()
+        state.autoPicksCount = clamp(Number(state.autoPicksCount || 1), 1, max)
+        if (el.desiredPicksInput) {
+          el.desiredPicksInput.max = String(max)
+          el.desiredPicksInput.value = String(state.autoPicksCount)
+        }
+        if (el.autoPicks) {
+          const presets = ['5', '20', '50', '100']
+          const v = String(state.autoPicksCount)
+          el.autoPicks.value = presets.includes(v) ? v : 'custom'
+        }
+      }
+
+      function toneColor(tone) {
+        if (tone === 'green') return '#2bff7c'
+        if (tone === 'yellow') return '#ffd12f'
+        if (tone === 'red') return '#ff2e4f'
+        if (tone === 'orange') return '#ff7a18'
+        return '#ffffff'
+      }
+
+      function artDataUri({ kind, seed }) {
+        const accentA = '#2bff7c'
+        const accentB = '#ffd12f'
+        const accentC = '#ff7a18'
+        const accentD = '#ff2e4f'
+        const title = kind === 'prize' ? 'Premio' : 'Promo'
+        const label = `${title} · ${seed}`
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="${accentA}" stop-opacity="0.95"/>
+                <stop offset="0.45" stop-color="${accentB}" stop-opacity="0.75"/>
+                <stop offset="0.72" stop-color="${accentC}" stop-opacity="0.6"/>
+                <stop offset="1" stop-color="${accentD}" stop-opacity="0.55"/>
+              </linearGradient>
+              <radialGradient id="r" cx="25%" cy="30%" r="65%">
+                <stop offset="0" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="1" stop-color="rgba(0,0,0,0)"/>
+              </radialGradient>
+              <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="18"/>
+              </filter>
+            </defs>
+            <rect width="1200" height="720" fill="#05060a"/>
+            <rect width="1200" height="720" fill="url(#g)"/>
+            <rect width="1200" height="720" fill="url(#r)"/>
+            <g opacity="0.55" filter="url(#blur)">
+              <circle cx="240" cy="140" r="120" fill="rgba(255,255,255,0.34)"/>
+              <circle cx="980" cy="540" r="160" fill="rgba(255,255,255,0.2)"/>
+              <circle cx="880" cy="170" r="120" fill="rgba(255,255,255,0.16)"/>
+            </g>
+            <rect x="54" y="54" width="1092" height="612" rx="48" fill="rgba(0,0,0,0.26)" stroke="rgba(255,255,255,0.14)" stroke-width="2"/>
+            <g opacity="0.92">
+              <path d="M336 470c-64 0-116-52-116-116s52-116 116-116c48 0 90 29 108 70 18-8 38-12 59-12 74 0 134 60 134 134s-60 134-134 134H336Z" fill="rgba(0,0,0,0.22)"/>
+              <path d="M704 438c-52 0-94-42-94-94s42-94 94-94c39 0 72 23 86 57 14-6 30-9 46-9 60 0 108 48 108 108s-48 108-108 108H704Z" fill="rgba(0,0,0,0.18)"/>
+              <circle cx="828" cy="292" r="44" fill="rgba(0,0,0,0.16)"/>
+              <circle cx="312" cy="304" r="56" fill="rgba(0,0,0,0.14)"/>
+              <circle cx="430" cy="338" r="38" fill="rgba(0,0,0,0.12)"/>
+              <circle cx="748" cy="332" r="30" fill="rgba(0,0,0,0.1)"/>
+            </g>
+            <text x="96" y="170" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto" font-size="56" font-weight="950" fill="rgba(255,255,255,0.92)">${escapeXml(
+              title,
+            )}</text>
+            <text x="96" y="220" font-family="ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto" font-size="22" font-weight="800" fill="rgba(255,255,255,0.72)">${escapeXml(
+              label,
+            )}</text>
+          </svg>
+        `.trim()
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+      }
+
+      function makeBadgeClass(tone) {
+        if (tone === 'green') return 'badge badgeGreen'
+        if (tone === 'yellow') return 'badge badgeYellow'
+        if (tone === 'red') return 'badge badgeRed'
+        return 'badge'
+      }
+
+      function renderGames() {
+        const activeId = state.activeGameId
+        el.games.innerHTML = ''
+        GAME_DEFS.forEach((g) => {
+          const btn = document.createElement('button')
+          btn.type = 'button'
+          btn.className = `gameCard ${g.id === activeId ? 'isActive' : ''}`
+          btn.setAttribute('aria-pressed', g.id === activeId ? 'true' : 'false')
+
+          const badgeClass = makeBadgeClass(g.badge.tone)
+          btn.innerHTML = `
+            <div class="gameTop">
+              <div>
+                <div class="gameName">${escapeXml(g.name)}</div>
+                <div class="gameMeta">${escapeXml(g.subtitle)} · ${money(g.price)}</div>
+              </div>
+              <span class="${badgeClass}">${escapeXml(g.badge.label)}</span>
+            </div>
+            <div class="hint">Precio fijo ${money(g.price)} / cartón.</div>
+          `.trim()
+
+          btn.addEventListener('click', () => {
+            state.activeGameId = g.id
+            state.selected = []
+            state.desiredPicks = g.picks
+            setAutoPicksCount(g.picks)
+            state.betAmount = g.price
+            render()
+            toast('Juego listo', 'Ahora puedes seleccionar los cartones que quieras.')
+          })
+          el.games.appendChild(btn)
+        })
+      }
+
+      function activeGame() {
+        return GAME_DEFS.find((g) => g.id === state.activeGameId) || GAME_DEFS[0]
+      }
+
+      function activeSeries() {
+        return SERIES_DEFS.find((s) => s.id === state.activeSeriesId) || SERIES_DEFS[0]
+      }
+
+      function seriesTotalPages() {
+        const s = activeSeries()
+        return Math.max(1, Math.ceil(s.total / SERIES_PAGE_SIZE))
+      }
+
+      function renderSeriesTabs() {
+        if (!el.seriesTabs) return
+        const activeId = state.activeSeriesId
+        el.seriesTabs.innerHTML = ''
+        SERIES_DEFS.forEach((s) => {
+          const b = document.createElement('button')
+          b.type = 'button'
+          b.className = `seriesBtn ${s.id === activeId ? 'isActive' : ''}`
+          b.setAttribute('aria-pressed', s.id === activeId ? 'true' : 'false')
+          b.innerHTML = `<span>Serie ${escapeXml(s.id)}</span><span class="seriesCount">${escapeXml(String(s.total))}</span>`
+          b.addEventListener('click', () => {
+            state.activeSeriesId = s.id
+            state.seriesPage = 1
+            renderPicker()
+          })
+          el.seriesTabs.appendChild(b)
+        })
+      }
+
+      function updateSeriesPager() {
+        const pages = seriesTotalPages()
+        state.seriesPage = clamp(state.seriesPage, 1, pages)
+        const s = activeSeries()
+        const start = (state.seriesPage - 1) * SERIES_PAGE_SIZE + 1
+        const end = Math.min(s.total, state.seriesPage * SERIES_PAGE_SIZE)
+        if (el.seriesPageHint) el.seriesPageHint.textContent = `Serie ${s.id} · ${start}-${end} de ${s.total}`
+        if (el.seriesPrevBtn) el.seriesPrevBtn.disabled = state.seriesPage <= 1
+        if (el.seriesNextBtn) el.seriesNextBtn.disabled = state.seriesPage >= pages
+      }
+
+      function canSelectMore() {
+        return true
+      }
+
+      function toggleCartonId(id) {
+        const has = state.selected.includes(id)
+        if (has) {
+          state.selected = state.selected.filter((x) => x !== id)
+          renderPicker()
+          return
+        }
+        state.selected = [...state.selected, id]
+        renderPicker()
+      }
+
+      function renderPicker() {
+        const g = activeGame()
+        const s = activeSeries()
+        const pages = seriesTotalPages()
+        state.seriesPage = clamp(state.seriesPage, 1, pages)
+
+        el.activeGameBadge.textContent = `${g.name}`
+        el.pickerHint.textContent = `Elige los cartones que quieras · Serie ${s.id} · ${s.total} disponibles.`
+        syncAutoControls()
+        renderSeriesTabs()
+        updateSeriesPager()
+
+        const picked = state.selected.slice().sort(sortCartonIds)
+        el.picked.innerHTML = ''
+        if (!picked.length) {
+          const ghost = document.createElement('span')
+          ghost.className = 'chip chipGhost'
+          ghost.textContent = 'Sin cartones'
+          el.picked.appendChild(ghost)
+        } else {
+          picked.forEach((id) => {
+            const chip = document.createElement('span')
+            chip.className = 'chip isHot'
+            chip.textContent = id
+            el.picked.appendChild(chip)
+          })
+        }
+
+        el.pickedHint.textContent = picked.length ? 'Listo para agregar al slip.' : 'Selecciona cartones para continuar.'
+        if (el.unitPrice) el.unitPrice.textContent = money(state.betAmount || g.price)
+        if (el.pickedCount) el.pickedCount.textContent = String(picked.length)
+        if (el.pickTotal) el.pickTotal.textContent = money((state.betAmount || g.price) * picked.length)
+
+        el.numberGrid.innerHTML = ''
+        const start = (state.seriesPage - 1) * SERIES_PAGE_SIZE + 1
+        const end = Math.min(s.total, state.seriesPage * SERIES_PAGE_SIZE)
+        for (let order = start; order <= end; order++) {
+          const id = cartonId(s.id, order)
+          const b = document.createElement('button')
+          b.type = 'button'
+          b.className = `numBtn ${state.selected.includes(id) ? 'isSelected' : ''}`
+          b.innerHTML = `<span class="numLabel">${pad3(order)}</span>`
+          b.setAttribute('aria-pressed', state.selected.includes(id) ? 'true' : 'false')
+          b.setAttribute('aria-label', `Cartón ${id}`)
+
+          b.addEventListener('click', () => {
+            openCartonModal({ series: s.id, order })
+          })
+          el.numberGrid.appendChild(b)
+        }
+      }
+
+      function pickRandom() {
+        const s = activeSeries()
+        const requested = Math.max(1, Number(state.autoPicksCount || 1))
+        const need = clamp(Math.min(requested, s.total), 1, s.total)
+        const bag = []
+        for (let i = 1; i <= s.total; i++) bag.push(i)
+        for (let i = bag.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          const tmp = bag[i]
+          bag[i] = bag[j]
+          bag[j] = tmp
+        }
+        state.selected = bag.slice(0, need).map((n) => cartonId(s.id, n)).sort(sortCartonIds)
+        renderPicker()
+        toast('Auto listo', need < requested ? `En Serie ${s.id} hay ${s.total}. Se eligieron ${need}.` : 'Combinación generada automáticamente.')
+      }
+
+      function clearPicker() {
+        state.selected = []
+        renderPicker()
+      }
+
+      function ticketPrice(t) {
+        const count = Array.isArray(t?.cartonIds) ? t.cartonIds.length : 0
+        const unit = Number(t?.betAmount || 0)
+        return Math.max(0, unit * count)
+      }
+
+      function slipTotals() {
+        const subtotal = state.slip.reduce((acc, t) => acc + ticketPrice(t), 0)
+        const fee = subtotal * SERVICE_FEE_RATE
+        const total = subtotal + fee
+        return { subtotal, fee, total }
+      }
+
+      function cartonesInSlip() {
+        return state.slip.reduce((acc, t) => acc + (Array.isArray(t.cartonIds) ? t.cartonIds.length : 0), 0)
+      }
+
+      function updateFooterSummary() {
+        if (!el.footerCartones || !el.footerUnit || !el.footerTotal) return
+        const unitValues = Array.from(new Set(state.slip.map((t) => Number(t.betAmount || 0)).filter((n) => n > 0)))
+        const unit = unitValues.length === 1 ? money(unitValues[0]) : unitValues.length > 1 ? 'Variado' : money(state.betAmount)
+        const { total } = slipTotals()
+        el.footerCartones.textContent = String(cartonesInSlip())
+        el.footerUnit.textContent = unit
+        el.footerTotal.textContent = money(total)
+      }
+
+      function renderLastDraws() {
+        if (!el.lastDraws) return
+        el.lastDraws.innerHTML = ''
+        LAST_DRAWS.forEach((d) => {
+          const row = document.createElement('div')
+          row.className = 'kvRow'
+          row.innerHTML = `<span>${escapeXml(d.date)} · ${escapeXml(d.round)}</span><span>${escapeXml(
+            d.balls.map((n) => pad3(n)).join(' - ')
+          )}</span>`
+          el.lastDraws.appendChild(row)
+        })
+      }
+
+      function saveSlip() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.slip))
+        } catch (e) {}
+      }
+
+      function loadSlip() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY)
+          if (!raw) return
+          const parsed = JSON.parse(raw)
+          if (!Array.isArray(parsed)) return
+          state.slip = parsed.filter((x) => x && typeof x === 'object' && Array.isArray(x.cartonIds))
+        } catch (e) {}
+      }
+
+      function saveActiveTickets() {
+        try {
+          localStorage.setItem(ACTIVE_KEY, JSON.stringify(state.activeTickets))
+        } catch (e) {}
+      }
+
+      function loadActiveTickets() {
+        try {
+          const raw = localStorage.getItem(ACTIVE_KEY)
+          if (!raw) return
+          const parsed = JSON.parse(raw)
+          if (!Array.isArray(parsed)) return
+          state.activeTickets = parsed.filter((x) => x && typeof x === 'object' && Array.isArray(x.cartonIds))
+        } catch (e) {}
+      }
+
+      function purgeExpiredActiveTickets() {
+        const now = Date.now()
+        const before = state.activeTickets.length
+        state.activeTickets = state.activeTickets.filter((t) => {
+          if (!t || typeof t !== 'object' || !Array.isArray(t.cartonIds)) return false
+          const exp = Number(t.expiresAt || 0)
+          return !exp || exp > now
+        })
+        if (state.activeTickets.length !== before) saveActiveTickets()
+      }
+
+      function addTicket() {
+        const g = activeGame()
+        if (!state.selected.length) {
+          toast('Sin cartones', 'Selecciona al menos 1 cartón para agregar al slip.')
+          return
+        }
+
+        const betAmount = Number(state.betAmount || g.price)
+        const multiplier = 1
+        const draws = Number(state.draws || 1)
+        const cartonIds = state.selected.slice().sort(sortCartonIds)
+        const t = {
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          gameId: g.id,
+          gameName: g.name,
+          cartonIds,
+          betAmount,
+          multiplier,
+          draws,
+          createdAt: Date.now(),
+        }
+        state.slip = [t, ...state.slip]
+        saveSlip()
+        clearPicker()
+        renderSlip()
+        toast('Agregado al slip', `${g.name} · ${cartonIds.join(' ')} · ${money(ticketPrice(t))}`)
+      }
+
+      function removeTicket(id) {
+        state.slip = state.slip.filter((t) => t.id !== id)
+        saveSlip()
+        renderSlip()
+      }
+
+      function clearSlip() {
+        state.slip = []
+        saveSlip()
+        renderSlip()
+        toast('Slip vacío', 'Puedes armar nuevas jugadas.')
+      }
+
+      function renderSlip() {
+        const { subtotal, fee, total } = slipTotals()
+        el.slipTotal.textContent = money(total)
+        el.slipCount.textContent = String(state.slip.length)
+
+        el.slipList.innerHTML = ''
+        if (!state.slip.length) {
+          const empty = document.createElement('div')
+          empty.className = 'hint'
+          empty.textContent = 'Sin jugadas aún. Elige un pack y agrega tus cartones.'
+          el.slipList.appendChild(empty)
+          updateFooterSummary()
+          return
+        }
+
+        state.slip.forEach((t) => {
+          const card = document.createElement('div')
+          card.className = 'ticket'
+          card.innerHTML = `
+            <div class="ticketTop">
+              <div>
+                <div class="ticketTitle">${escapeXml(t.gameName)}</div>
+                <div class="ticketMeta">${t.cartonIds.length} cartón(es) · ${money(t.betAmount)} / cartón</div>
+              </div>
+              <button class="btn btnDanger" type="button" data-remove="${escapeXml(t.id)}">Quitar</button>
+            </div>
+            <div class="ticketNums" aria-label="Cartones">
+              ${t.cartonIds.map((id) => `<span class="chip isHot">${escapeXml(id)}</span>`).join('')}
+            </div>
+            <div class="bingoStrip" data-bingo aria-label="Cartones disponibles"></div>
+            <div class="miniRow"><span>Subtotal</span><span>${money(ticketPrice(t))}</span></div>
+          `.trim()
+          card.querySelector('[data-remove]').addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-remove')
+            removeTicket(id)
+          })
+          const strip = card.querySelector('[data-bingo]')
+          if (strip) {
+            t.cartonIds.forEach((id) => {
+              const parsed = parseCartonId(id)
+              if (!parsed) return
+              const s = SERIES_DEFS.find((x) => x.id === parsed.series)
+              if (!s) return
+              strip.appendChild(renderBingoCard({ series: parsed.series, seriesTotal: s.total, order: parsed.order, unitPrice: t.betAmount }))
+            })
+          }
+          el.slipList.appendChild(card)
+        })
+
+        const extra = document.createElement('div')
+        extra.className = 'ticket'
+        extra.innerHTML = `
+          <div class="miniRow"><span>Subtotal</span><span>${money(subtotal)}</span></div>
+          <div class="miniRow"><span>Cargo de servicio</span><span>${money(fee)}</span></div>
+          <div class="divider"></div>
+          <div class="miniRow" style="font-weight:950"><span>Total</span><span>${money(total)}</span></div>
+        `.trim()
+        el.slipList.appendChild(extra)
+        updateFooterSummary()
+      }
+
+      function renderPromos() {
+        el.promoGrid.innerHTML = ''
+        PROMOS.forEach((p) => {
+          const card = document.createElement('div')
+          card.className = 'promo'
+          card.innerHTML = `
+            <div class="promoArt"><img alt="Promo ${escapeXml(p.title)}" loading="lazy"></div>
+            <div class="promoBody">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div class="promoTitle">${escapeXml(p.title)}</div>
+                <span class="${makeBadgeClass(p.tone)}">${p.tone === 'green' ? 'Ahorro' : p.tone === 'yellow' ? 'Flash' : 'Bono'}</span>
+              </div>
+              <div class="promoText">${escapeXml(p.text)}</div>
+            </div>
+          `.trim()
+          card.querySelector('img').src = p.img ? encodeURI(p.img) : artDataUri(p.art)
+          el.promoGrid.appendChild(card)
+        })
+      }
+
+      function renderPrizes() {
+        el.prizeGrid.innerHTML = ''
+        PRIZES.forEach((p) => {
+          const card = document.createElement('div')
+          card.className = 'promo'
+          card.innerHTML = `
+            <div class="promoArt"><img alt="Premio ${escapeXml(p.title)}" loading="lazy"></div>
+            <div class="promoBody">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div class="promoTitle">${escapeXml(p.title)}</div>
+                <span class="${makeBadgeClass(p.tone)}">${escapeXml(p.badge)}</span>
+              </div>
+              <div class="promoText">${escapeXml(p.text)}</div>
+            </div>
+          `.trim()
+          card.querySelector('img').src = p.img ? encodeURI(p.img) : artDataUri(p.art)
+          el.prizeGrid.appendChild(card)
+        })
+      }
+
+      function updateHero() {
+        el.heroGames.textContent = `${GAME_DEFS.length} juegos`
+        const now = new Date()
+        const draw = new Date(now.getTime() + 1000 * 60 * 60 * 20)
+        const dd = String(draw.getDate()).padStart(2, '0')
+        const mm = String(draw.getMonth() + 1).padStart(2, '0')
+        el.heroDraw.textContent = `${dd}/${mm} · 8:00 pm`
+        el.heroJackpot.textContent = '$1,250,000'
+        el.heroPrizeBadge.textContent = 'Jackpot'
+        el.heroPrizeImg.src = encodeURI('fotos loteria/premio mayor.png')
+      }
+
+      function toast(title, body) {
+        el.toastTitle.textContent = String(title || 'Listo')
+        el.toastBody.textContent = String(body || '')
+        el.toast.style.display = 'flex'
+        window.clearTimeout(toast._t)
+        toast._t = window.setTimeout(() => {
+          el.toast.style.display = 'none'
+        }, 2400)
+      }
+
+      function showModal(mode) {
+        el.modalOverlay.style.display = 'block'
+        const isCheckout = mode === 'checkout'
+        const isCarton = mode === 'carton'
+        const isMine = mode === 'myCartons'
+        const isDraws = mode === 'draws'
+        if (el.checkoutContent) el.checkoutContent.hidden = !isCheckout
+        if (el.cartonContent) el.cartonContent.hidden = !isCarton
+        if (el.myCartonsContent) el.myCartonsContent.hidden = !isMine
+        if (el.drawsContent) el.drawsContent.hidden = !isDraws
+      }
+
+      function openCheckoutModal() {
+        const { subtotal, fee, total } = slipTotals()
+        if (el.modalTitle) el.modalTitle.textContent = 'Checkout (demo)'
+        el.checkoutSummary.innerHTML = ''
+        const cartones = cartonesInSlip()
+        const rows = [
+          { k: 'Cartones', v: `${cartones}` },
+          { k: 'Subtotal', v: money(subtotal) },
+          { k: 'Cargo servicio', v: money(fee) },
+          { k: 'Total', v: money(total) },
+          { k: 'Pagos', v: 'Tarjeta · Pago móvil · Transferencia · USDT' },
+        ]
+        rows.forEach((r) => {
+          const row = document.createElement('div')
+          row.className = 'kvRow'
+          row.innerHTML = `<span>${escapeXml(r.k)}</span><span>${escapeXml(r.v)}</span>`
+          el.checkoutSummary.appendChild(row)
+        })
+        showModal('checkout')
+      }
+
+      function openCartonModal({ series, order }) {
+        const s = SERIES_DEFS.find((x) => x.id === series)
+        const id = cartonId(series, order)
+        if (el.modalTitle) el.modalTitle.textContent = `Cartón ${id}`
+
+        if (el.cartonMeta) {
+          el.cartonMeta.innerHTML = ''
+          const rows = [
+            { k: 'Serie', v: series },
+            { k: 'Orden', v: pad3(order) },
+            { k: 'Total serie', v: s ? String(s.total) : '—' },
+            { k: 'Precio del cartón', v: money(state.betAmount) },
+          ]
+          rows.forEach((r) => {
+            const row = document.createElement('div')
+            row.className = 'kvRow'
+            row.innerHTML = `<span>${escapeXml(r.k)}</span><span>${escapeXml(r.v)}</span>`
+            el.cartonMeta.appendChild(row)
+          })
+        }
+
+        if (el.cartonPreview) {
+          el.cartonPreview.innerHTML = ''
+          if (s) el.cartonPreview.appendChild(renderBingoCard({ series, seriesTotal: s.total, order, unitPrice: state.betAmount }))
+        }
+
+        const selected = state.selected.includes(id)
+        const full = !selected && !canSelectMore()
+        if (el.cartonSelectBtn) {
+          el.cartonSelectBtn.className = `btn ${selected ? 'btnDanger' : 'btnPrimary'}`
+          el.cartonSelectBtn.textContent = selected ? 'Quitar' : 'Seleccionar'
+          el.cartonSelectBtn.disabled = full
+          el.cartonSelectBtn.onclick = () => {
+            toggleCartonId(id)
+            closeModal()
+          }
+        }
+
+        showModal('carton')
+      }
+
+      function openMyCartonsModal() {
+        purgeExpiredActiveTickets()
+        if (el.modalTitle) el.modalTitle.textContent = 'Mis cartones'
+
+        const grouped = new Map()
+        let total = 0
+        state.activeTickets.forEach((t) => {
+          if (!t || typeof t !== 'object' || !Array.isArray(t.cartonIds)) return
+          t.cartonIds.forEach((id) => {
+            const p = parseCartonId(id)
+            if (!p) return
+            total++
+            if (!grouped.has(p.series)) grouped.set(p.series, new Set())
+            grouped.get(p.series).add(p.order)
+          })
+        })
+
+        if (el.myCartonsSummary) {
+          el.myCartonsSummary.innerHTML = ''
+          const rows = [
+            { k: 'Cartones vigentes', v: String(total) },
+            { k: 'Series', v: grouped.size ? Array.from(grouped.keys()).sort().join(' · ') : '—' },
+          ]
+          rows.forEach((r) => {
+            const row = document.createElement('div')
+            row.className = 'kvRow'
+            row.innerHTML = `<span>${escapeXml(r.k)}</span><span>${escapeXml(r.v)}</span>`
+            el.myCartonsSummary.appendChild(row)
+          })
+        }
+
+        if (el.myCartonsList) {
+          el.myCartonsList.innerHTML = ''
+          if (!total) {
+            const empty = document.createElement('div')
+            empty.className = 'hint'
+            empty.textContent = 'No tienes cartones vigentes.'
+            el.myCartonsList.appendChild(empty)
+          } else {
+            Array.from(grouped.entries())
+              .sort((a, b) => a[0].localeCompare(b[0]))
+              .forEach(([series, ordersSet]) => {
+                const orders = Array.from(ordersSet).sort((a, b) => a - b)
+                const d = document.createElement('details')
+                d.style.border = '1px solid rgba(255,255,255,0.12)'
+                d.style.borderRadius = '14px'
+                d.style.padding = '10px 12px'
+                d.style.background = 'rgba(10,11,16,0.42)'
+                d.style.marginBottom = '10px'
+                const s = document.createElement('summary')
+                s.style.cursor = 'pointer'
+                s.style.fontWeight = '900'
+                s.textContent = `Serie ${series} · ${orders.length}`
+                d.appendChild(s)
+                const list = document.createElement('div')
+                list.className = 'picked'
+                list.style.marginTop = '10px'
+                orders.forEach((n) => {
+                  const chip = document.createElement('span')
+                  chip.className = 'chip isHot'
+                  chip.textContent = `${series}-${pad3(n)}`
+                  list.appendChild(chip)
+                })
+                d.appendChild(list)
+                el.myCartonsList.appendChild(d)
+              })
+          }
+        }
+
+        showModal('myCartons')
+      }
+
+      function setDraws(next) {
+        const n = clamp(Number(next || 1), 1, 200)
+        state.draws = n
+        applyInputs()
+      }
+
+      function openDrawsModal() {
+        if (el.modalTitle) el.modalTitle.textContent = 'Participar por'
+        if (el.drawsInput) el.drawsInput.value = String(state.draws || 1)
+        if (el.drawsModalValue) el.drawsModalValue.textContent = `${state.draws || 1}`
+        showModal('draws')
+      }
+
+      function closeModal() {
+        el.modalOverlay.style.display = 'none'
+      }
+
+      function confirmCheckout() {
+        if (!state.slip.length) {
+          toast('Sin jugadas', 'Agrega una combinación al slip primero.')
+          return
+        }
+        purgeExpiredActiveTickets()
+        const now = Date.now()
+        const activated = state.slip.map((t) => {
+          const draws = Number(t?.draws || 1)
+          return {
+            ...t,
+            id: `a-${now}-${Math.random().toString(16).slice(2)}`,
+            purchasedAt: now,
+            expiresAt: now + Math.max(1, draws) * DRAW_DURATION_MS,
+          }
+        })
+        state.activeTickets = [...activated, ...state.activeTickets]
+        saveActiveTickets()
+        closeModal()
+        toast('Compra confirmada (demo)', `Cartones vigentes: ${activated.reduce((acc, t) => acc + (Array.isArray(t.cartonIds) ? t.cartonIds.length : 0), 0)}.`)
+        clearSlip()
+      }
+
+      function initExclusiveVideoPlayback() {
+        const videos = Array.from(document.querySelectorAll('video'))
+        if (!videos.length) return
+        videos.forEach((v) => {
+          v.addEventListener('play', () => {
+            videos.forEach((other) => {
+              if (other === v) return
+              if (other.paused) return
+              other.pause()
+            })
+          })
+        })
+      }
+
+      function initAutoPicks() {
+        if (!el.autoPicks) return
+        if (el.autoPicks.options.length) return
+        const presets = [5, 20, 50, 100]
+        const custom = document.createElement('option')
+        custom.value = 'custom'
+        custom.textContent = 'Más...'
+        el.autoPicks.appendChild(custom)
+        presets.forEach((n) => {
+          const opt = document.createElement('option')
+          opt.value = String(n)
+          opt.textContent = `${n} cartones`
+          el.autoPicks.appendChild(opt)
+        })
+        syncAutoControls()
+      }
+
+      function applyInputs() {
+        const g = activeGame()
+        state.betAmount = Number(g.price || state.betAmount || 0)
+        state.draws = clamp(Number(state.draws || 1), 1, 200)
+        if (el.drawsHint) el.drawsHint.textContent = `${state.draws} sorteo(s) seleccionado(s).`
+        if (el.drawsOpenBtn) el.drawsOpenBtn.textContent = `Sorteos: ${state.draws}`
+        if (el.drawsModalValue) el.drawsModalValue.textContent = `${state.draws}`
+      }
+
+      function addPromoCombo() {
+        pickRandom()
+        state.draws = 2
+        applyInputs()
+        toast('Combo cargado', 'Auto + 2 sorteos (demo).')
+      }
+
+      function render() {
+        initAutoPicks()
+        purgeExpiredActiveTickets()
+        renderGames()
+        renderPicker()
+        renderSlip()
+        renderPromos()
+        renderPrizes()
+        renderLastDraws()
+        updateHero()
+        applyInputs()
+        updateFooterSummary()
+        document.getElementById('y').textContent = String(new Date().getFullYear())
+      }
+
+      if (el.autoPicks) {
+        el.autoPicks.addEventListener('change', () => {
+          if (el.autoPicks.value === 'custom') {
+            if (el.desiredPicksInput) el.desiredPicksInput.focus()
+            return
+          }
+          setAutoPicksCount(Number(el.autoPicks.value || 1))
+          renderPicker()
+        })
+      }
+      if (el.desiredPicksInput) {
+        el.desiredPicksInput.addEventListener('input', () => {
+          setAutoPicksCount(Number(el.desiredPicksInput.value || 1))
+          renderPicker()
+        })
+      }
+      if (el.drawsOpenBtn) el.drawsOpenBtn.addEventListener('click', openDrawsModal)
+      if (el.drawsPresetGrid) {
+        el.drawsPresetGrid.addEventListener('click', (e) => {
+          const btn = e.target && e.target.closest && e.target.closest('button[data-draws]')
+          if (!btn) return
+          const v = Number(btn.getAttribute('data-draws') || 1)
+          setDraws(v)
+          if (el.drawsInput) el.drawsInput.value = String(state.draws || v)
+        })
+      }
+      if (el.drawsInput) {
+        el.drawsInput.addEventListener('input', () => {
+          const v = Number(el.drawsInput.value || 1)
+          if (el.drawsModalValue) el.drawsModalValue.textContent = `${clamp(v, 1, 200)}`
+        })
+      }
+      if (el.drawsSaveBtn) {
+        el.drawsSaveBtn.addEventListener('click', () => {
+          setDraws(Number((el.drawsInput && el.drawsInput.value) || state.draws || 1))
+          closeModal()
+        })
+      }
+      el.randomBtn.addEventListener('click', pickRandom)
+      el.clearBtn.addEventListener('click', clearPicker)
+      el.addTicketBtn.addEventListener('click', addTicket)
+      el.quickComboBtn.addEventListener('click', addPromoCombo)
+      el.clearSlipBtn.addEventListener('click', clearSlip)
+      el.checkoutBtn.addEventListener('click', () => {
+        if (!state.slip.length) {
+          toast('Slip vacío', 'Agrega una jugada para continuar.')
+          return
+        }
+        openCheckoutModal()
+      })
+      el.openCheckoutBtn.addEventListener('click', () => {
+        if (!state.slip.length) {
+          toast('Slip vacío', 'Agrega una jugada para continuar.')
+          return
+        }
+        openCheckoutModal()
+      })
+      if (el.payNowBtn) {
+        el.payNowBtn.addEventListener('click', () => {
+          if (!state.slip.length) {
+            toast('Slip vacío', 'Agrega una jugada para continuar.')
+            return
+          }
+          openCheckoutModal()
+        })
+      }
+      if (el.myCartonsBtn) el.myCartonsBtn.addEventListener('click', openMyCartonsModal)
+      if (el.drawsCloseBtn) el.drawsCloseBtn.addEventListener('click', closeModal)
+      el.modalCloseBtn.addEventListener('click', closeModal)
+      el.cancelBtn.addEventListener('click', closeModal)
+      el.confirmBtn.addEventListener('click', confirmCheckout)
+      if (el.cartonCloseBtn) el.cartonCloseBtn.addEventListener('click', closeModal)
+      if (el.myCartonsCloseBtn) el.myCartonsCloseBtn.addEventListener('click', closeModal)
+      el.modalOverlay.addEventListener('click', (e) => {
+        if (e.target === el.modalOverlay) closeModal()
+      })
+      if (el.seriesPrevBtn) {
+        el.seriesPrevBtn.addEventListener('click', () => {
+          state.seriesPage = Math.max(1, state.seriesPage - 1)
+          renderPicker()
+        })
+      }
+      if (el.seriesNextBtn) {
+        el.seriesNextBtn.addEventListener('click', () => {
+          state.seriesPage = Math.min(seriesTotalPages(), state.seriesPage + 1)
+          renderPicker()
+        })
+      }
+
+      initExclusiveVideoPlayback()
+      loadSlip()
+      loadActiveTickets()
+      purgeExpiredActiveTickets()
+      render()
+      window.setInterval(purgeExpiredActiveTickets, 60 * 1000)
+    </script>
+  </body>
+</html>
