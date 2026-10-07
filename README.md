@@ -1,30 +1,36 @@
-# Plataforma de loterías · Demo UI/UX
+# Sitio de lotería · Prototipo UX/UI
 
-**A Spanish-language product interface prototype by Xioleni Salazar.**
+**Diseño y desarrollo: Xioleni Salazar** · [Portafolio](https://xioleni.com/)
 
-This responsive demo presents a lottery experience with game selection, number cards, a ticket slip, and a mobile-friendly layout. It is built with HTML, CSS, and vanilla JavaScript.
+[Abrir la demo](https://xioleni.com/proyectos/plataforma-loterias/)
 
-**Vista previa:** [Abrir la demo](https://xioleni.com/proyectos/plataforma-loterias/)
+## Descripción del proyecto
 
-## Features
+Prototipo responsive de una plataforma de venta de juegos de azar, con selección de números, promociones y un slip de compra demostrativo. La interfaz simula el recorrido para explorar juegos, preparar varias jugadas y revisar el ticket antes de continuar.
 
-- Browse demo games and select numbers
-- Review a ticket slip and its sample total
-- Keep the demo slip in browser storage
-- Responsive layouts for desktop and mobile
+## Ficha del proyecto
 
-## Run locally
+- **Tipo:** plataforma de venta de demostración con selección de números.
+- **Código:** HTML · CSS · JavaScript.
+- **Dificultad:** Media–alta.
+- **Enfoque:** transmitir confianza, explicar el juego con claridad y facilitar la selección de números y la revisión del ticket.
 
-```powershell
-py -m http.server 8000
-```
+## Qué incluye
 
-Open `http://localhost:8000`.
+- Selección de juegos y picking de números.
+- Promociones y premios destacados de muestra.
+- Slip de compra con varias jugadas.
+- Persistencia del ticket de demostración mediante `localStorage`.
+- Layout adaptable para escritorio y dispositivos móviles.
 
-## Demo scope
+## Alcance de la demo
 
-This is an interface prototype. Game data, prizes, and payment methods are examples; the checkout does not place bets or process payments. Videos used as testimonials in the original portfolio preview are omitted from this public copy.
+Es un prototipo de interfaz: los juegos, premios, promociones y métodos de pago son ejemplos. No acepta apuestas, no procesa pagos ni crea compras reales. Los videos testimoniales del sitio original no forman parte de esta copia pública.
 
-## Credits
+## Ejecutar localmente
 
-Design and development: **Xioleni Salazar** · [xioleni.com](https://xioleni.com)
+Sirve la carpeta con `py -m http.server 8000` y abre `http://localhost:8000`.
+
+## Créditos
+
+Diseño e implementación de **Xioleni Salazar**.
