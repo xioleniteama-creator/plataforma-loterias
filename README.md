@@ -2,7 +2,7 @@
 
 **Diseño y desarrollo: Xioleni Salazar** · [Portafolio](https://xioleni.com/)
 
-[Abrir la demo](https://xioleni.com/proyectos/plataforma-loterias/)\n\n![Captura del prototipo Loter&iacute;a Pro con la interfaz de selecci&oacute;n de n&uacute;meros.](docs/screenshots/plataforma-loterias.png)
+[Abrir la demo](https://xioleni.com/proyectos/plataforma-loterias/)
 
 ## Descripción del proyecto
 
