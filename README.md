@@ -4,6 +4,8 @@
 
 [Abrir la demo](https://xioleni.com/proyectos/plataforma-loterias/)
 
+![Captura del prototipo Loter&iacute;a Pro con la interfaz de selecci&oacute;n de n&uacute;meros.](docs/screenshots/plataforma-loterias.png)
+
 ## Descripción del proyecto
 
 Prototipo responsive de una plataforma de venta de juegos de azar, con selección de números, promociones y un slip de compra demostrativo. La interfaz simula el recorrido para explorar juegos, preparar varias jugadas y revisar el ticket antes de continuar.
@@ -39,7 +41,6 @@ Diseño e implementación de **Xioleni Salazar**.
 
 Prototipo UX/UI de una plataforma de loter&iacute;a con selecci&oacute;n de n&uacute;meros y flujo de ticket de demostraci&oacute;n.
 
-![Captura del prototipo Loter&iacute;a Pro con la interfaz de selecci&oacute;n de n&uacute;meros.](docs/screenshots/plataforma-loterias.png)
 
 **Demo:** consulta el enlace indicado arriba. **C&oacute;digo:** abre este repositorio. Las capturas muestran el proyecto local tal como est&aacute; en este c&oacute;digo.
 
